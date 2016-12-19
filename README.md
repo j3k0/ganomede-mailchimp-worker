@@ -16,6 +16,7 @@ Configuration
 
  * `DATA_PORT_8080_TCP_ADDR` - IP of the data service
  * `DATA_PORT_8080_TCP_PORT` - Port of the data service
+ * `BUNYAN_LEVEL` — [log level](https://github.com/trentm/node-bunyan#levels), defaults to `INFO`.
 
 API
 ---
