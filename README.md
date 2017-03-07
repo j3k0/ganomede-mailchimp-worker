@@ -31,3 +31,9 @@ The module will also provide a monitoring API similar to other module of ganomed
 ### GET /mailchimp-worker/about
 
 ### GET /mailchimp-worker/ping/:stuff
+
+Pending design question
+---
+
+ * If possible, add the originator of the event ("from" field) as a source for the mailchimp registration.
+ 
