@@ -1,6 +1,7 @@
 'use strict';
 
 const lodash = require('lodash');
+const {GanomedeError} = require('./errors');
 
 class SubscriptionRequest {
   constructor ({userId, email, from, metadata}) {
@@ -14,16 +15,24 @@ class SubscriptionRequest {
     const {type, from} = event;
 
     if (type !== 'CREATE')
-      return null;
+      return new SubscriptionRequest.IgnoredEventError('`event.type` %j is ignored', type);
 
-    if (allowedFromValues && !allowedFromValues.includes(from))
-      return null;
+    if (allowedFromValues && !allowedFromValues.includes(from)) {
+      return new SubscriptionRequest.IgnoredEventError(
+        '`event.from` does not match any of allowed values %j',
+        allowedFromValues
+      );
+    }
 
     const {userId, metadata} = event.data;
     const email = lodash.get(event, 'data.aliases.email');
 
-    if (!email)
-      return null;
+    if (!email) {
+      return new SubscriptionRequest.IgnoredEventError(
+        '`event.data.aliases.email is malformed or missing (%j)',
+        email
+      );
+    }
 
     return new SubscriptionRequest({
       userId,
@@ -33,6 +42,8 @@ class SubscriptionRequest {
     });
   }
 }
+
+SubscriptionRequest.IgnoredEventError = class IgnoredEventError extends GanomedeError {};
 
 class SubscriptionInfo {
   constructor ({type, listId, subscriptionId, G_VIA}) {

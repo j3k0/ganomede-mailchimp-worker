@@ -2,6 +2,7 @@
 
 const async = require('async');
 const {SubscriptionRequest} = require('../src/objects');
+const logger = require('./logger');
 
 // fn is a function with signature:
 //  - (callback)
@@ -52,7 +53,14 @@ class SubscribesUsers {
     );
 
     const steps = [
-      (cb) => cb(null, request), // We need `request` in scope for `usermeta.write()`.
+      (cb) => { // We need `request` in scope for `write()`, so nullify it inside.
+        if (request instanceof SubscriptionRequest.IgnoredEventError) {
+          logger.info(request, `Event(id=${event.id}) ignored`);
+          return cb(null, null);
+        }
+
+        cb(null, request);
+      },
       (request, cb) => this.mailchimp.subscribe(this.mailchimpListId, request, cb),
       (info, cb) => this.usermeta.write(
         request.userId,

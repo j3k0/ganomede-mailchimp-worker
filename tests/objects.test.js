@@ -35,21 +35,34 @@ describe('objects', () => {
         });
       });
 
-      it('only accepts CREATE events', () => {
-        expect(SubscriptionRequest.fromEvent(event({type: 'x'}))).to.be.null;
-      });
+      describe('returns IgnoredEventError', () => {
+        const mustBeError = (actual, re) => {
+          expect(actual).to.be.instanceof(SubscriptionRequest.IgnoredEventError);
+          expect(actual.message).to[re instanceof RegExp ? 'match' : 'equal'](re);
+        };
 
-      it('only accepts events with matching `from` if allowedFromValues is specified', () => {
-        expect(SubscriptionRequest.fromEvent(
-          event(),
-          {allowedFromValues: ['something else']}
-        )).to.be.null;
-      });
+        it('if `type` is not CREATE', () => {
+          mustBeError(
+            SubscriptionRequest.fromEvent(event({type: 'x'})),
+            '`event.type` "x" is ignored'
+          );
+        });
 
-      it('only accepts users that specified email', () => {
-        const e = event();
-        assert(delete e.data.aliases.email);
-        expect(SubscriptionRequest.fromEvent(e)).to.be.null;
+        it('if `from` does not match any of allowedFromValues', () => {
+          mustBeError(
+            SubscriptionRequest.fromEvent(event(), {allowedFromValues: ['something else']}),
+            /^`event\.from` does not match any of allowed values/
+          );
+        });
+
+        it('if `data.aliases.email` is malformed or missing', () => {
+          const e = event();
+          assert(delete e.data.aliases.email);
+          mustBeError(
+            SubscriptionRequest.fromEvent(e),
+            /^`event\.data\.aliases\.email is malformed or missing/
+          );
+        });
       });
     });
   });

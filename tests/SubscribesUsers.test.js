@@ -1,14 +1,18 @@
 'use strict';
 
-const SubscribesUsers = require('../src/SubscribesUsers');
+const {SubscriptionRequest} = require('../src/objects');
 
 describe('SubscribesUsers', () => {
   describe('#process()', () => {
+    let SubscribesUsers;
+    let logger;
     let usermetaClient;
     let mailchimpClient;
     let subject;
 
     beforeEach(() => {
+      logger = td.replace('../src/logger', td.object(['info']));
+      SubscribesUsers = require('../src/SubscribesUsers');
       usermetaClient = td.object(['write']);
       mailchimpClient = td.object(['subscribe']);
       subject = new SubscribesUsers({
@@ -45,11 +49,12 @@ describe('SubscribesUsers', () => {
       });
     });
 
-    it('null falls through', (done) => {
-      subject.process({type: 'returns null'}, (err) => {
+    it('null falls through and ignored event is logged', (done) => {
+      subject.process({id: 42, type: 'returns null'}, (err) => {
         expect(err).to.be.null;
         td.assert(mailchimpClient.subscribe).callCount(0);
         td.assert(usermetaClient.write).callCount(0);
+        td.verify(logger.info(td.matchers.isA(SubscriptionRequest.IgnoredEventError), 'Event(id=42) ignored'));
         done();
       });
     });
