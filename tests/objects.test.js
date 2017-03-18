@@ -1,5 +1,6 @@
 'use strict';
 
+const lodash = require('lodash');
 const {
   SubscriptionRequest,
   SubscriptionInfo,
@@ -9,7 +10,7 @@ const {
 describe('objects', () => {
   describe('SubscriptionRequest', () => {
     describe('.fromEvent()', () => {
-      const event = (overrides) => Object.assign({
+      const event = (overrides) => lodash.merge({
         channel: 'users/v1',
         type: 'CREATE',
         from: 'app that user registred from',
@@ -60,15 +61,19 @@ describe('objects', () => {
           assert(delete e.data.aliases.email);
           mustBeError(
             SubscriptionRequest.fromEvent(e),
-            /^`event\.data\.aliases\.email is malformed or missing/
+            /^`event\.data\.aliases\.email` is malformed or missing/
+          );
+        });
+
+        it('if `data.metadata.newsletter` is false', () => {
+          const e = event({data: {metadata: {newsletter: false}}});
+          mustBeError(
+            SubscriptionRequest.fromEvent(e),
+            '`event.data.metadata.newsletter` is false'
           );
         });
       });
     });
-  });
-
-  describe('SubscriptionInfo', () => {
-
   });
 
   describe('MailchimpPayload', () => {

@@ -26,11 +26,18 @@ class SubscriptionRequest {
 
     const {userId, metadata} = event.data;
     const email = lodash.get(event, 'data.aliases.email');
+    const newsletter = lodash.get(event, 'data.metadata.newsletter', true);
 
     if (!email) {
       return new SubscriptionRequest.IgnoredEventError(
-        '`event.data.aliases.email is malformed or missing (%j)',
+        '`event.data.aliases.email` is malformed or missing (%j)',
         email
+      );
+    }
+
+    if (!newsletter) {
+      return new SubscriptionRequest.IgnoredEventError(
+        '`event.data.metadata.newsletter` is false'
       );
     }
 
