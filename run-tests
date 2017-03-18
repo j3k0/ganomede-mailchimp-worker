@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+function exports {
+  export API_SECRET="doesnt_matter"
+  export NEWSLETTER_NAME="doesnt_matter"
+  export MAILCHIMP_LIST_ID="doesnt_matter"
+  export MAILCHIMP_API_KEY="doesnt_matter"
+  export MAILCHIMP_DATA_CENTER="doesnt_matter"
+  export EVENTS_CLIENT_ID="doesnt_matter"
+  export LOG_LEVEL="FATAL"
+}
+
+function main {
+  exports
+  ./node_modules/.bin/mocha --bail --no-exit --throw-deprecation tests/helper.js "tests/**/*.test.js"
+}
+
+main

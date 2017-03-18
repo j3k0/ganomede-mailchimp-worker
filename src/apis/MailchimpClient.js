@@ -9,6 +9,7 @@ const toBase64 = (str) => Buffer.from(str, 'utf8').toString('base64');
 class MailchimpClient extends BaseClient {
   constructor ({clientId, apiKey, dataCenter}) {
     super(`https://${dataCenter}.api.mailchimp.com/3.0`, {
+      userAgent: clientId,
       headers: {'authorization': `Basic ${toBase64(`${clientId}:${apiKey}`)}`}
     });
   }

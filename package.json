@@ -1,28 +1,28 @@
 {
-  "name": "REPLACE_THIS_WITH_YOUR_THING",
+  "name": "mailchimp-worker",
   "version": "0.0.1",
   "private": true,
-  "api": "REPLACE_THIS_WITH_YOUR_THING/v1",
-  "description": "REPLACE_THIS_WITH_YOUR_THING microservice",
+  "api": "mailchimp-worker/v1",
+  "description": "mailchimp-worker microservice",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "startw": "nodemon --watch src/ --watch index.js --watch config.js --exec 'npm start'",
-    "test": "LOG_LEVEL=ERROR mocha --bail --no-exit --throw-deprecation tests/helper.js 'tests/**/*.test.js'",
+    "test": "./run-tests",
     "testw": "nodemon --watch src/ --watch tests/ --watch config.js --exec 'npm test'",
     "lint": "eslint src/ tests/ index.js config.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/REPLACE_THIS_WITH_YOUR_THING.git"
+    "url": "git+https://github.com/j3k0/ganomede-mailchimp-worker.git"
   },
   "keywords": [],
   "author": "",
   "license": "Trade Secret",
   "bugs": {
-    "url": "https://github.com/REPLACE_THIS_WITH_YOUR_THING/issues"
+    "url": "https://github.com/j3k0/ganomede-mailchimp-worker/issues"
   },
-  "homepage": "https://github.com/REPLACE_THIS_WITH_YOUR_THING#readme",
+  "homepage": "https://github.com/j3k0/ganomede-mailchimp-worker#readme",
   "devDependencies": {
     "chai": "^3.5.0",
     "eslint": "^3.8.0",
@@ -35,6 +35,7 @@
     "async": "^2.1.2",
     "bunyan": "^1.8.1",
     "curtain-down": "^1.0.0",
+    "ganomede-events": "^1.1.0",
     "lodash": "^4.17.2",
     "restify": "^4.1.1",
     "url-escape-tag": "^1.0.0"
