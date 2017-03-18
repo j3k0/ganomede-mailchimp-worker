@@ -22,6 +22,9 @@ class SubscriptionRequest {
     const {userId, metadata} = event.data;
     const email = lodash.get(event, 'data.aliases.email');
 
+    if (!email)
+      return null;
+
     return new SubscriptionRequest({
       userId,
       email,

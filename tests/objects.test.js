@@ -45,6 +45,12 @@ describe('objects', () => {
           {allowedFromValues: ['something else']}
         )).to.be.null;
       });
+
+      it('only accepts users that specified email', () => {
+        const e = event();
+        assert(delete e.data.aliases.email);
+        expect(SubscriptionRequest.fromEvent(e)).to.be.null;
+      });
     });
   });
 

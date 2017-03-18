@@ -30,6 +30,7 @@ td.assert = (double) => {
 
 global.__ganomede_test = true;
 global.td = td;
+global.assert = assert;
 global.expect = expect;
 
 afterEach(() => td.reset());
