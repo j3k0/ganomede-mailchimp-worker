@@ -81,7 +81,11 @@ describe('objects', () => {
       userId: 'alice',
       email: 'alice@wonderland.com',
       from: 'app',
-      metadata: {}
+      metadata: {
+        country: 'Russia',
+        yearofbirth: 2000,
+        newsletter: true
+      }
     });
 
     const payload = new MailchimpPayload(request);
@@ -92,7 +96,9 @@ describe('objects', () => {
         status: 'subscribed',
         merge_fields: {
           G_USERID: 'alice',
-          G_VIA: 'app'
+          G_VIA: 'app',
+          G_COUNTRY: 'Russia',
+          G_YOB: 2000
         }
       });
     });
@@ -123,7 +129,7 @@ describe('objects', () => {
       });
 
       expect(problems).to.eql({
-        missing: ['G_VIA'],
+        missing: ['G_VIA', 'G_COUNTRY', 'G_YOB'],
         invalid: ['G_USERID']
       });
     });

@@ -67,7 +67,9 @@ class MailchimpPayload {
     this.status = 'subscribed';
     this.merge_fields = {
       G_USERID: subscriptionRequest.userId,
-      G_VIA: subscriptionRequest.from
+      G_VIA: subscriptionRequest.from,
+      G_COUNTRY: subscriptionRequest.metadata.country,
+      G_YOB: subscriptionRequest.metadata.yearofbirth
     };
   }
 

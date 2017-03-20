@@ -10,6 +10,20 @@ The mailchimp module will:
  * Listen for registrations and changes related events from ganomede-users.
  * Register the users' emails in mailchimp
 
+Before starting, you should create mailchimp list and add following merge fields:
+
+ * `G_USERID` of type `text` to store Ganomede User ID of registred user;
+ * `G_VIA` of type `text` for app name user registred from;
+ * `G_COUNTRY` of type `text` for user-selected country;
+ * `G_YOB` of type `number` for user's year of birth.
+
+This can be done by going to "List / Settings / List fields and \*|MERGE|\* tags" section of created list:
+
+![merge-fields.png](docs/merge-fields.png)
+
+Worker will infer other subscriber information like location's latitude and longitude,
+but it's always wortth to store original values too.
+
 Configuration
 -------------
 
