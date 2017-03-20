@@ -16,7 +16,11 @@ class MailchimpClient extends BaseClient {
 
   subscribe (listId, request, callback) {
     const payload = new MailchimpPayload(request);
-    this.apiCall('post', urlEscape`/lists/${listId}/members`, payload, callback);
+    this.apiCall('post', urlEscape`/lists/${listId}/members`, payload, (err, reply) => {
+      return err
+        ? callback(err)
+        : callback(null, payload.toSubscriptionInfo(reply));
+    });
   }
 }
 

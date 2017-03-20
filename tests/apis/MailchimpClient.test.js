@@ -1,7 +1,7 @@
 'use strict';
 
 const url = require('url');
-const {SubscriptionRequest} = require('../../src/objects');
+const {SubscriptionRequest, SubscriptionInfo} = require('../../src/objects');
 const MailchimpClient = require('../../src/apis/MailchimpClient');
 
 describe('MailchimpClient', () => {
@@ -35,11 +35,11 @@ describe('MailchimpClient', () => {
       td.replace(client.api, 'post', td.function());
 
       td.when(client.api.post('/3.0/lists/deadbeef/members', td.matchers.anything(), td.callback))
-        .thenCallback(null, {}, {}, {ok: true});
+        .thenCallback(null, {}, {}, {});
 
-      client.subscribe('deadbeef', req, (err, reply) => {
+      client.subscribe('deadbeef', req, (err, info) => {
         expect(err).to.be.null;
-        expect(reply).to.eql({ok: true});
+        expect(info).to.be.instanceof(SubscriptionInfo);
         done();
       });
     });

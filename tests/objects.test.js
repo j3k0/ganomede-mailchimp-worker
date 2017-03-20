@@ -1,6 +1,7 @@
 'use strict';
 
 const lodash = require('lodash');
+const samples = require('./samples');
 const {
   SubscriptionRequest,
   SubscriptionInfo,
@@ -104,19 +105,13 @@ describe('objects', () => {
     });
 
     it('#toSubscriptionInfo() includes all the redis things', () => {
-      const reply = {
-        id: 'some-md5',
-        list_id: 'deadbeef',
-        merge_fields: {something: 'true'} // intentionally omit G_VIA
-      };
-
-      const result = payload.toSubscriptionInfo(reply);
+      const result = payload.toSubscriptionInfo(samples.mailchimp.addMemberReply);
 
       expect(result).to.be.instanceof(SubscriptionInfo);
       expect(result).to.eql({
         type: 'mailchimp',
-        listId: 'deadbeef',
-        subscriptionId: 'some-md5',
+        listId: '85b0235cb4',
+        subscriptionId: '488604a52f35acb808c17fcd36f96881',
         G_VIA: 'app'
       });
     });
