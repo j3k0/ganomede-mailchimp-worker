@@ -35,7 +35,10 @@ describe('MailchimpClient', () => {
       td.replace(client.api, 'post', td.function());
 
       td.when(client.api.post('/3.0/lists/deadbeef/members', td.matchers.anything(), td.callback))
-        .thenCallback(null, {}, {}, {});
+        .thenCallback(null, {}, {}, {
+          // Otherwise #detectProblems() throws…
+          merge_fields: {}
+        });
 
       client.subscribe('deadbeef', req, (err, info) => {
         expect(err).to.be.null;

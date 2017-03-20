@@ -124,6 +124,7 @@ describe('objects', () => {
       });
 
       expect(problems).to.eql({
+        hasProblems: true,
         missing: ['G_VIA', 'G_COUNTRY', 'G_YOB'],
         invalid: ['G_USERID']
       });

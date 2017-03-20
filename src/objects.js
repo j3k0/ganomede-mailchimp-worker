@@ -95,7 +95,11 @@ class MailchimpPayload {
         invalid.push(field);
     });
 
-    return {missing, invalid};
+    return {
+      hasProblems: (missing.length + invalid.length) > 0,
+      missing,
+      invalid
+    };
   }
 }
 

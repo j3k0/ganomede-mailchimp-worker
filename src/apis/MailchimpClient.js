@@ -3,6 +3,7 @@
 const urlEscape = require('url-escape-tag');
 const BaseClient = require('./BaseClient');
 const {MailchimpPayload} = require('../objects');
+const logger = require('../logger');
 
 const toBase64 = (str) => Buffer.from(str, 'utf8').toString('base64');
 
@@ -16,10 +17,16 @@ class MailchimpClient extends BaseClient {
 
   subscribe (listId, request, callback) {
     const payload = new MailchimpPayload(request);
+
     this.apiCall('post', urlEscape`/lists/${listId}/members`, payload, (err, reply) => {
-      return err
-        ? callback(err)
-        : callback(null, payload.toSubscriptionInfo(reply));
+      if (err)
+        return callback(err);
+
+      const problems = payload.detectProblems(reply);
+      if (problems.hasProblems)
+        logger.warn(problems, `Problems detected with Merge Tags of mailchimp list ${listId}`);
+
+      callback(null, payload.toSubscriptionInfo(reply));
     });
   }
 }
