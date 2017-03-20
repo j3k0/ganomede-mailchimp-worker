@@ -1,0 +1,56 @@
+'use strict';
+
+const restify = require('restify');
+const curtain = require('curtain-down');
+const createServer = require('./create-server');
+const ping = require('./ping.router');
+const about = require('./about.router');
+const logger = require('./logger');
+const config = require('../config');
+
+const serve = () => {
+  const server = createServer();
+
+  curtain.on(() => {
+    logger.info('server stopping…');
+    server.close();
+  });
+
+  about(config.http.prefix, server);
+  ping(config.http.prefix, server);
+
+  server.listen(config.http.port, config.http.host, () => {
+    const {port, family, address} = server.address();
+    logger.info('ready at %s:%d (%s)', address, port, family);
+  });
+
+  // Handle uncaughtException, kill the worker.
+  server.on('uncaughtException', (req, res, route, err) => {
+    logger.error(err);
+
+    // Note: we're in dangerous territory!
+    // By definition, something unexpected occurred,
+    // which we probably didn't want.
+    // Anything can happen now! Be very careful!
+    try {
+      // make sure we close down within 30 seconds
+      setTimeout(() => process.exit(1), 30e3);
+
+      // stop taking new requests
+      server.close();
+
+      // Let the master know we're dead.  This will trigger a
+      // 'disconnect' in the cluster master, and then it will fork
+      // a new worker.
+      // cluster.worker.disconnect();
+
+      const message = err.message || 'unexpected error';
+      res.send(new restify.InternalError(message));
+    }
+    catch (err2) {
+      logger.error(err2, 'error sending 500!');
+    }
+  });
+};
+
+module.exports = serve;
