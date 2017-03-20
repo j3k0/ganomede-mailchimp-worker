@@ -45,11 +45,11 @@ Configuration
    - `EVENTS_PORT_8080_TCP_[ADDR|PORT|PROTOCOL]` - IP|Port|Protocol to the events service
    - `EVENTS_CLIENT_ID` non-empty string to [identify this worker](https://github.com/j3k0/ -anomede-events#new-clientclientid-options)
    - `EVENTS_CHANNEL` non-empty string, defaults to `"users/v1"`, channel to listen for  -vents on
-   - `EVENTS_PREFIX` api prefix, defaults to `"events/v1"`
+   - `EVENTS_PREFIX` api prefix, defaults to `"/events/v1"`
 
  * ganomede-usermeta instance (trakc subscription status)
    - `USERMETA_PORT_8080_TCP_[ADDR|PORT|PROTOCOL]` - IP|Port|Protocol to the usermeta service
-   - `USERMETA_PREFIX` api prefix, defaults to `"usermeta/v1"`
+   - `USERMETA_PREFIX` api prefix, defaults to `"/usermeta/v1"`
 
  * HTTP status server
    - `HOST` non-empty string, defaults to `"0.0.0.0"`

@@ -81,7 +81,7 @@ module.exports = {
   },
 
   usermeta: Object.assign(
-    {pathnamePrefix: nonempty('USERMETA_PREFIX', 'usermeta/v1')},
+    {pathnamePrefix: nonempty('USERMETA_PREFIX', '/usermeta/v1')},
     ServiceEnv.config('USERMETA', 8080)
   ),
 
@@ -89,7 +89,7 @@ module.exports = {
     {
       clientId: nonempty('EVENTS_CLIENT_ID'),
       channel: nonempty('EVENTS_CHANNEL', 'users/v1'),
-      pathnamePrefix: nonempty('EVENTS_PREFIX', 'events/v1')
+      pathnamePrefix: nonempty('EVENTS_PREFIX', '/events/v1')
     },
     ServiceEnv.config('EVENTS', 8080)
   )

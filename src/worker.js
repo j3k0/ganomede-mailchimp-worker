@@ -4,12 +4,13 @@ const {Client} = require('ganomede-events');
 const SubscribesUsers = require('./SubscribesUsers');
 const UsermetaClient = require('./apis/UsermetaClient');
 const MailchimpClient = require('./apis/MailchimpClient');
+const logger = require('./logger');
 const config = require('../config');
 
 const work = () => {
-  // TODO
-  // fix linter
-  const subscriber = new SubscribesUsers({ // eslint-disable-line no-unused-vars
+  logger.info(config, 'Running with config');
+
+  const subscriber = new SubscribesUsers({
     usermetaClient: new UsermetaClient({
       protocol: config.usermeta.protocol,
       hostname: config.usermeta.host,
@@ -34,15 +35,18 @@ const work = () => {
     protocol: config.events.protocol,
     hostname: config.events.host,
     port: config.events.port,
-    pathname: config.events.pathnamePrefix
+    pathname: `${config.events.pathnamePrefix}/events`
   });
 
   events.on(config.events.channel, (event, channel) => {
-    throw new Error('NotImplemented');
+    subscriber.process(event, (error) => {
+      if (error)
+        logger.error({channel, error}, `Failed to process Event(${event.id})`);
+    });
   });
 
   events.on('error', (error, channel) => {
-    throw new Error('NotImplemented');
+    logger.error({channel, error}, 'Events channel error');
   });
 };
 
