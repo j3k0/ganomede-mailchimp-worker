@@ -1,0 +1,74 @@
+version: '2'
+services:
+
+  sut:
+    build: .
+    command: sh -c "./run-tests && ./tests/rest_api.sh"
+    volumes:
+     - ./src:/home/app/code/src
+     - ./tests:/home/app/code/tests
+     - ./run-tests:/home/app/code/run-tests
+    depends_on:
+     - mailchimp
+    environment:
+     - "BASE_URL=http://mailchimp:8000"
+     - "API_SECRET=doesnt_matter"
+     - "LOG_LEVEL=fatal"
+     - "NODE_ENV="
+     - "NEWSLETTER_NAME=doesnt_matter"
+     - "MAILCHIMP_LIST_ID=doesnt_matter"
+     - "MAILCHIMP_API_KEY=doesnt_matter"
+     - "MAILCHIMP_DATA_CENTER=doesnt_matter"
+     - "EVENTS_CLIENT_ID=doesnt_matter"
+
+  mailchimp:
+    build: .
+    volumes:
+     - ./src:/home/app/code/src
+    depends_on:
+     - events
+     - usermeta
+    environment:
+     - "API_SECRET=doesnt_matter"
+     - "LOG_LEVEL=debug"
+     - "NODE_ENV="
+     - "USERMETA_PORT_8000_TCP_ADDR=centralusermeta"
+     - "EVENTS_PORT_8000_TCP_ADDR=events"
+     - "NEWSLETTER_NAME=doesnt_matter"
+     - "MAILCHIMP_LIST_ID=doesnt_matter"
+     - "MAILCHIMP_API_KEY=doesnt_matter"
+     - "MAILCHIMP_DATA_CENTER=doesnt_matter"
+     - "EVENTS_CLIENT_ID=doesnt_matter"
+    ports:
+     - "8001:8000"
+
+  usermeta:
+    image: ganomede/usermeta:v1.2.1
+    ports:
+     - "8004:8000"
+    depends_on:
+     - redis
+    environment:
+     - "API_SECRET=doesnt_matter"
+     - "USERMETA_PUBLIC_KEYS="
+     - "USERMETA_PROTECTED_KEYS="
+     - "USERMETA_PRIVATE_KEYS="
+     - "USERMETA_MAX_LENGTH=1000"
+     - "REDIS_USERMETA_PORT_6379_TCP_ADDR=redis"
+     - "REDIS_AUTH_PORT_6379_TCP_ADDR=redis"
+     - "LOG_LEVEL=debug"
+     - "NODE_ENV="
+
+  events:
+    image: ganomede/events:v1.2.0
+    depends_on:
+     - redis
+    environment:
+     - "API_SECRET=doesnt_matter"
+     - "REDIS_EVENTS_PORT_6379_TCP_ADDR=redis"
+     - "LOG_LEVEL=debug"
+     - "NODE_ENV="
+     - "POLL_TIMEOUT=30000"
+
+  redis:
+    image: redis:alpine
