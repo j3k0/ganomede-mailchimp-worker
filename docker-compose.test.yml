@@ -3,42 +3,48 @@ services:
 
   sut:
     build: .
-    command: sh -c "./run-tests && ./tests/rest_api.sh"
+    command: sh -c "./wait-for-it mailchimp:8000 && ./run-tests && ./tests/rest_api.sh"
     volumes:
      - ./src:/home/app/code/src
      - ./tests:/home/app/code/tests
      - ./run-tests:/home/app/code/run-tests
+     - ./wait-for-it:/home/app/code/wait-for-it
     depends_on:
      - mailchimp
+     - events
+     - usermeta
+     - statsd
     environment:
      - "BASE_URL=http://mailchimp:8000"
+     - "EVENTS_URL=http://events:8000"
+     - "USERMETA_URL=http://usermeta:8000"
      - "API_SECRET=doesnt_matter"
      - "LOG_LEVEL=fatal"
      - "NODE_ENV="
-     - "NEWSLETTER_NAME=doesnt_matter"
-     - "MAILCHIMP_LIST_ID=doesnt_matter"
-     - "MAILCHIMP_API_KEY=doesnt_matter"
-     - "MAILCHIMP_DATA_CENTER=doesnt_matter"
-     - "EVENTS_CLIENT_ID=doesnt_matter"
 
   mailchimp:
     build: .
+    command: sh -c "./wait-for-it redis:6379 && ./wait-for-it statsd:8126 && node index.js"
     volumes:
      - ./src:/home/app/code/src
+     - ./wait-for-it:/home/app/code/wait-for-it
     depends_on:
      - events
      - usermeta
+     - statsd
     environment:
      - "API_SECRET=doesnt_matter"
      - "LOG_LEVEL=debug"
      - "NODE_ENV="
-     - "USERMETA_PORT_8000_TCP_ADDR=centralusermeta"
+     - "USERMETA_PORT_8000_TCP_ADDR=usermeta"
      - "EVENTS_PORT_8000_TCP_ADDR=events"
-     - "NEWSLETTER_NAME=doesnt_matter"
-     - "MAILCHIMP_LIST_ID=doesnt_matter"
-     - "MAILCHIMP_API_KEY=doesnt_matter"
-     - "MAILCHIMP_DATA_CENTER=doesnt_matter"
-     - "EVENTS_CLIENT_ID=doesnt_matter"
+     - "NEWSLETTER_NAME=testname"
+     - "MAILCHIMP_LIST_ID=testlist"
+     - "MAILCHIMP_API_KEY=testkey"
+     - "MAILCHIMP_DATA_CENTER=test"
+     - "EVENTS_CLIENT_ID=testid"
+     - "STATSD_HOST=statsd"
+     - "STATSD_PORT=8125"
     ports:
      - "8001:8000"
 
@@ -63,6 +69,8 @@ services:
     image: ganomede/events:v1.2.0
     depends_on:
      - redis
+    ports:
+     - "8003:8000"
     environment:
      - "API_SECRET=doesnt_matter"
      - "REDIS_EVENTS_PORT_6379_TCP_ADDR=redis"
@@ -72,3 +80,6 @@ services:
 
   redis:
     image: redis:alpine
+
+  statsd:
+    image: "hopsoft/graphite-statsd"

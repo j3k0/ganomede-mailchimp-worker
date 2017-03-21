@@ -5,7 +5,7 @@ const {Client} = require('ganomede-events');
 const SubscribesUsers = require('./SubscribesUsers');
 const UsermetaClient = require('./apis/UsermetaClient');
 const MailchimpClient = require('./apis/MailchimpClient');
-const StatsdClient = require('./apis/MailchimpClient');
+const StatsdClient = require('./apis/StatsdClient');
 const logger = require('./logger');
 const config = require('../config');
 

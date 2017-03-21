@@ -1,4 +1,6 @@
 machine:
+  environment:
+    API_SECRET: doesnt_matter
   node:
     version: 6.10.0
 test:
