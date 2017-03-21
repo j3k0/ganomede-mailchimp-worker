@@ -35,7 +35,7 @@
     "async": "^2.1.2",
     "bunyan": "^1.8.1",
     "curtain-down": "^1.0.0",
-    "ganomede-events": "^1.1.0",
+    "ganomede-events": "^1.2.0",
     "lodash": "^4.17.2",
     "restify": "^4.1.1",
     "url-escape-tag": "^1.0.0"

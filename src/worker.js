@@ -8,6 +8,58 @@ const MailchimpClient = require('./apis/MailchimpClient');
 const logger = require('./logger');
 const config = require('../config');
 
+class Worker {
+  constructor ({subscriber, events, channel}) {
+    this.subscriber = subscriber;
+    this.events = events;
+    this.channel = channel;
+    this.stopped = true;
+    this.onEvent = this.onEvent.bind(this);
+    this.onError = this.onError.bind(this);
+    this.onCycle = this.onCycle.bind(this);
+  }
+
+  onEvent (event, channel) {
+    // Since we may stop after all events are emitted, there will be no ACK.
+    // So to not reprocess this event on next launch, skip them.
+    if (this.stopped)
+      return;
+
+    this.subscriber.process(event, (error) => {
+      if (error)
+        logger.error({channel, error}, `Failed to process Event(${event.id})`);
+    });
+  }
+
+  onError (error, channel) {
+    logger.error({channel, error}, 'Events channel error');
+  }
+
+  onCycle (cursors, channel) {
+    if (this.stopped && (channel === this.channel)) {
+      this.events.removeListener(this.channel, this.onEvent);
+      this.events.removeListener('error', this.onError);
+      this.events.removeListener('cycle', this.onCycle);
+      logger.info('Worker stopped.');
+    }
+  }
+
+  start () {
+    if (!this.stopped)
+      return;
+
+    this.stopped = false;
+    this.events.on(this.channel, this.onEvent);
+    this.events.on('error', this.onError);
+    this.events.on('cycle', this.onCycle);
+  }
+
+  stop () {
+    this.stopped = true;
+    logger.info('Working stopping after next cycle…');
+  }
+}
+
 const work = () => {
   logger.info(config, 'Running with config');
 
@@ -39,26 +91,14 @@ const work = () => {
     pathname: `${config.events.pathnamePrefix}/events`
   });
 
-  const processEvent = (event, channel) => {
-    subscriber.process(event, (error) => {
-      if (error)
-        logger.error({channel, error}, `Failed to process Event(${event.id})`);
-
-      if (stopProcessing)
-        events.removeListener(config.events.channel, processEvent);
-    });
-  };
-
-  // We need this var instead of directly unsubscribing,
-  // because if we remove listener directly we risk ignoring
-  // events already in progress.
-  let stopProcessing = false;
-  curtain.on(() => stopProcessing = true);
-  events.on(config.events.channel, processEvent);
-
-  events.on('error', (error, channel) => {
-    logger.error({channel, error}, 'Events channel error');
+  const worker = new Worker({
+    subscriber,
+    events,
+    channel: config.events.channel
   });
+
+  worker.start();
+  curtain.once(() => worker.stop());
 };
 
 module.exports = work;
