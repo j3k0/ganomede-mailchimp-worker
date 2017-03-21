@@ -91,16 +91,63 @@ describe('objects', () => {
 
     const payload = new MailchimpPayload(request);
 
-    it('new MailchimpPayload() correctly initialized from request', () => {
-      expect(payload).to.eql({
-        email_address: 'alice@wonderland.com',
-        status: 'subscribed',
-        merge_fields: {
-          G_USERID: 'alice',
-          G_VIA: 'app',
-          G_COUNTRY: 'Russia',
-          G_YOB: 2000
-        }
+    describe('new MailchimpPayload()', () => {
+      it('correctly initialized from request', () => {
+        expect(payload).to.eql({
+          email_address: 'alice@wonderland.com',
+          status: 'subscribed',
+          merge_fields: {
+            G_USERID: 'alice',
+            G_VIA: 'app',
+            G_COUNTRY: 'Russia',
+            G_YOB: 2000
+          }
+        });
+      });
+
+      it('picks location from metadata when set explicitly', () => {
+        const req = {
+          userId: 'alice',
+          email: 'alice@wonderland.com',
+          from: 'app',
+          metadata: {
+            country: 'ru',
+            latitude: 0,
+            longitude: 0
+          }
+        };
+
+        expect(new MailchimpPayload(req).location).to.eql({
+          latitude: 0,
+          longitude: 0
+        });
+      });
+
+      it('derives location from country code', () => {
+        const req = {
+          userId: 'alice',
+          email: 'alice@wonderland.com',
+          from: 'app',
+          metadata: {
+            country: 'ru'
+          }
+        };
+
+        expect(new MailchimpPayload(req).location).to.eql({
+          latitude: 55.75,
+          longitude: 37.600000
+        });
+      });
+
+      it('if no country or location is specified, `location` is not included', () => {
+        const req = {
+          userId: 'alice',
+          email: 'alice@wonderland.com',
+          from: 'app',
+          metadata: {}
+        };
+
+        expect(new MailchimpPayload(req)).to.not.have.property('location');
       });
     });
 

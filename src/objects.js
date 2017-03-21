@@ -2,6 +2,7 @@
 
 const lodash = require('lodash');
 const {GanomedeError} = require('./errors');
+const resolveLocation = require('./resolve-location');
 
 class SubscriptionRequest {
   constructor ({userId, email, from, metadata}) {
@@ -71,6 +72,10 @@ class MailchimpPayload {
       G_COUNTRY: subscriptionRequest.metadata.country,
       G_YOB: subscriptionRequest.metadata.yearofbirth
     };
+
+    const location = resolveLocation(subscriptionRequest.metadata);
+    if (location)
+      this.location = location;
   }
 
   toSubscriptionInfo (mailchimpReply) {
