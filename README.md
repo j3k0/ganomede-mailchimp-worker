@@ -46,13 +46,13 @@ Configuration
    - `MAILCHIMP_DATA_CENTER` non-empty string; [Mailchimp Data Center](http://developer.mailchimp.com/documentation/mailchimp/guides/get-started-with-mailchimp-api-3/#resources)
 
  * ganomede-events instance
-   - `EVENTS_PORT_8080_TCP_[ADDR|PORT|PROTOCOL]` - IP|Port|Protocol to the events service
+   - `EVENTS_PORT_8000_TCP_[ADDR|PORT|PROTOCOL]` - IP|Port|Protocol to the events service
    - `EVENTS_CLIENT_ID` non-empty string to [identify this worker](https://github.com/j3k0/ -anomede-events#new-clientclientid-options)
    - `EVENTS_CHANNEL` non-empty string, defaults to `"users/v1"`, channel to listen for  -vents on
    - `EVENTS_PREFIX` api prefix, defaults to `"/events/v1"`
 
  * ganomede-usermeta instance (trakc subscription status)
-   - `USERMETA_PORT_8080_TCP_[ADDR|PORT|PROTOCOL]` - IP|Port|Protocol to the usermeta service
+   - `USERMETA_PORT_8000_TCP_[ADDR|PORT|PROTOCOL]` - IP|Port|Protocol to the usermeta service
    - `USERMETA_PREFIX` api prefix, defaults to `"/usermeta/v1"`
 
  * StatsD for tracking stats (if host or port are missing, no stats will be sent)

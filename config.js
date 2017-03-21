@@ -7,7 +7,7 @@ const {debugInspect} = require('./src/utils');
 
 const parseLogLevel = (envValue) => {
   const defaultLevel = 'INFO';
-  const desiredLevel = envValue ? String(envValue) : defaultLevel;
+  const desiredLevel = envValue ? String(envValue).toUpperCase() : defaultLevel;
   const levels = [
     'FATAL',
     'ERROR',
@@ -87,7 +87,7 @@ module.exports = {
 
   usermeta: Object.assign(
     {pathnamePrefix: nonempty('USERMETA_PREFIX', '/usermeta/v1')},
-    ServiceEnv.config('USERMETA', 8080)
+    ServiceEnv.config('USERMETA', 8000)
   ),
 
   events: Object.assign(
@@ -96,7 +96,7 @@ module.exports = {
       channel: nonempty('EVENTS_CHANNEL', 'users/v1'),
       pathnamePrefix: nonempty('EVENTS_PREFIX', '/events/v1')
     },
-    ServiceEnv.config('EVENTS', 8080)
+    ServiceEnv.config('EVENTS', 8000)
   ),
 
   statsd: {

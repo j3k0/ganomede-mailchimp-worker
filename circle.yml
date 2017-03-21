@@ -1,3 +1,15 @@
 machine:
+  environment:
+    API_SECRET: doesnt_matter
+    NEWSLETTER_NAME: doesnt_matter
+    MAILCHIMP_LIST_ID: doesnt_matter
+    MAILCHIMP_API_KEY: doesnt_matter
+    MAILCHIMP_DATA_CENTER: doesnt_matter
+    EVENTS_CLIENT_ID: doesnt_matter
   node:
     version: 6.10.0
+test:
+  post:
+    - npm run coverage
+    - npm install https://github.com/nickmerwin/node-coveralls
+    - cat ./coverage/lcov.info | ./node_modules/.bin/coveralls

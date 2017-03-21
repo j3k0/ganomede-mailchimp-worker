@@ -1,0 +1,85 @@
+version: '2'
+services:
+
+  sut:
+    build: .
+    command: sh -c "./wait-for-it mailchimp:8000 && ./run-tests && ./tests/rest_api.sh"
+    volumes:
+     - ./src:/home/app/code/src
+     - ./tests:/home/app/code/tests
+     - ./run-tests:/home/app/code/run-tests
+     - ./wait-for-it:/home/app/code/wait-for-it
+    depends_on:
+     - mailchimp
+     - events
+     - usermeta
+     - statsd
+    environment:
+     - "BASE_URL=http://mailchimp:8000"
+     - "EVENTS_URL=http://events:8000"
+     - "USERMETA_URL=http://usermeta:8000"
+     - "API_SECRET=doesnt_matter"
+     - "LOG_LEVEL=fatal"
+     - "NODE_ENV="
+
+  mailchimp:
+    build: .
+    command: sh -c "./wait-for-it redis:6379 && ./wait-for-it statsd:8126 && node index.js"
+    volumes:
+     - ./src:/home/app/code/src
+     - ./wait-for-it:/home/app/code/wait-for-it
+    depends_on:
+     - events
+     - usermeta
+     - statsd
+    environment:
+     - "API_SECRET=doesnt_matter"
+     - "LOG_LEVEL=debug"
+     - "NODE_ENV="
+     - "USERMETA_PORT_8000_TCP_ADDR=usermeta"
+     - "EVENTS_PORT_8000_TCP_ADDR=events"
+     - "NEWSLETTER_NAME=testname"
+     - "MAILCHIMP_LIST_ID=testlist"
+     - "MAILCHIMP_API_KEY=testkey"
+     - "MAILCHIMP_DATA_CENTER=test"
+     - "EVENTS_CLIENT_ID=testid"
+     - "STATSD_HOST=statsd"
+     - "STATSD_PORT=8125"
+    ports:
+     - "8001:8000"
+
+  usermeta:
+    image: ganomede/usermeta:v1.2.1
+    ports:
+     - "8004:8000"
+    depends_on:
+     - redis
+    environment:
+     - "API_SECRET=doesnt_matter"
+     - "USERMETA_PUBLIC_KEYS="
+     - "USERMETA_PROTECTED_KEYS="
+     - "USERMETA_PRIVATE_KEYS="
+     - "USERMETA_MAX_LENGTH=1000"
+     - "REDIS_USERMETA_PORT_6379_TCP_ADDR=redis"
+     - "REDIS_AUTH_PORT_6379_TCP_ADDR=redis"
+     - "LOG_LEVEL=debug"
+     - "NODE_ENV="
+
+  events:
+    image: ganomede/events:v1.2.0
+    depends_on:
+     - redis
+    ports:
+     - "8003:8000"
+    environment:
+     - "API_SECRET=doesnt_matter"
+     - "REDIS_EVENTS_PORT_6379_TCP_ADDR=redis"
+     - "LOG_LEVEL=debug"
+     - "NODE_ENV="
+     - "POLL_TIMEOUT=30000"
+
+  redis:
+    image: redis:alpine
+
+  statsd:
+    image: "hopsoft/graphite-statsd"
