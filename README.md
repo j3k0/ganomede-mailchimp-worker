@@ -19,7 +19,11 @@ Before starting, you should create mailchimp list and add following merge fields
 
 This can be done by going to "List / Settings / List fields and \*|MERGE|\* tags" section of created list:
 
-![merge-fields.png](docs/merge-fields.png)
+![merge-fields-1.png](docs/merge-fields-1.png)
+
+The add the required fields:
+
+![merge-fields-2.png](docs/merge-fields-2.png)
 
 Worker will infer other subscriber information like location's latitude and longitude,
 but it's always wortth to store original values too.
