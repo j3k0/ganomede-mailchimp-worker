@@ -40,17 +40,22 @@ const parseApiSecret = () => {
   return process.env.API_SECRET;
 };
 
-const nonempty = (envName, defaultValue) => {
+const nonempty = function (envName, defaultValue) {
   const val = process.env[envName];
-  const ok = process.env.hasOwnProperty(envName) && (val.length > 0);
+  const has = process.env.hasOwnProperty(envName);
+  const ok = has && (val.length > 0);
 
-  if (ok)
-    return val;
+  if (has) {
+    if (ok)
+      return val;
 
-  if (defaultValue)
+    throw new Error(`Env var ${envName} must be non-empty string empty`);
+  }
+
+  if (arguments.length === 2)
     return defaultValue;
 
-  throw new Error(`Env var ${envName} is missing or empty string`);
+  throw new Error(`Env var ${envName} is missing`);
 };
 
 module.exports = {
@@ -92,7 +97,13 @@ module.exports = {
       pathnamePrefix: nonempty('EVENTS_PREFIX', '/events/v1')
     },
     ServiceEnv.config('EVENTS', 8080)
-  )
+  ),
+
+  statsd: {
+    hostname: nonempty('STATSD_HOST', false),
+    port: nonempty('STATSD_PORT', false),
+    prefix: nonempty('STATSD_PREFIX', 'mailchimp.registrations.')
+  }
 };
 
 if (!module.parent)

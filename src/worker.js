@@ -5,14 +5,16 @@ const {Client} = require('ganomede-events');
 const SubscribesUsers = require('./SubscribesUsers');
 const UsermetaClient = require('./apis/UsermetaClient');
 const MailchimpClient = require('./apis/MailchimpClient');
+const StatsdClient = require('./apis/MailchimpClient');
 const logger = require('./logger');
 const config = require('../config');
 
 class Worker {
-  constructor ({subscriber, events, channel}) {
+  constructor ({subscriber, events, channel, statsd}) {
     this.subscriber = subscriber;
     this.events = events;
     this.channel = channel;
+    this.statsd = statsd;
     this.stopped = true;
     this.onEvent = this.onEvent.bind(this);
     this.onError = this.onError.bind(this);
@@ -25,9 +27,16 @@ class Worker {
     if (this.stopped)
       return;
 
-    this.subscriber.process(event, (error) => {
-      if (error)
+    this.statsd.increment('events');
+
+    this.subscriber.process(event, (error, nullIfEventWasIgnored) => {
+      if (error) {
+        this.statsd.increment('failure');
         logger.error({channel, error}, `Failed to process Event(${event.id})`);
+        return;
+      }
+
+      this.statsd.increment((nullIfEventWasIgnored === null) ? 'ignored' : 'success');
     });
   }
 
@@ -91,9 +100,12 @@ const work = () => {
     pathname: `${config.events.pathnamePrefix}/events`
   });
 
+  const statsd = new StatsdClient(config.statsd);
+
   const worker = new Worker({
     subscriber,
     events,
+    statsd,
     channel: config.events.channel
   });
 

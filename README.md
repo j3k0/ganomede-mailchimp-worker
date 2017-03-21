@@ -51,6 +51,18 @@ Configuration
    - `USERMETA_PORT_8080_TCP_[ADDR|PORT|PROTOCOL]` - IP|Port|Protocol to the usermeta service
    - `USERMETA_PREFIX` api prefix, defaults to `"/usermeta/v1"`
 
+ * StatsD for tracking stats (if host or port are missing, no stats will be sent)
+   - `STATSD_HOST`
+   - `STATSD_PORT`
+   - `STATSD_PREFIX` defaults to `"mailchimp.registrations."`
+
+   This will track 4 integers:
+
+   - `events` total number of received events
+   - `failure` number of errors
+   - `success` number of successes
+   - `ignored` number of ignored events
+
  * HTTP status server
    - `HOST` non-empty string, defaults to `"0.0.0.0"`
    - `PORT` non-empty string, defaults to `8000`

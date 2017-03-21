@@ -40,8 +40,9 @@ describe('SubscribesUsers', () => {
       td.when(usermetaClient.write('bob', 'newsletters$test', td.matchers.isA(String), td.callback))
         .thenCallback(null, {});
 
-      subject.process(event, (err) => {
+      subject.process(event, (err, nullIfEventWasIgnored) => {
         expect(err).to.be.null;
+        expect(nullIfEventWasIgnored).to.be.undefined;
         // Since <null> will fall through, check that everything was called.
         td.assert(mailchimpClient.subscribe).callCount(1);
         td.assert(usermetaClient.write).callCount(1);
@@ -50,8 +51,9 @@ describe('SubscribesUsers', () => {
     });
 
     it('null falls through and ignored event is logged', (done) => {
-      subject.process({id: 42, type: 'returns null'}, (err) => {
+      subject.process({id: 42, type: 'returns null'}, (err, nullIfEventWasIgnored) => {
         expect(err).to.be.null;
+        expect(nullIfEventWasIgnored).to.be.null;
         td.assert(mailchimpClient.subscribe).callCount(0);
         td.assert(usermetaClient.write).callCount(0);
         td.verify(logger.info(td.matchers.isA(SubscriptionRequest.IgnoredEventError), 'Event(id=42) ignored'));
