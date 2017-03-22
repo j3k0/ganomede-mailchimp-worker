@@ -1,6 +1,6 @@
 {
   "name": "mailchimp-worker",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
   "api": "mailchimp-worker/v1",
   "description": "mailchimp-worker microservice",
