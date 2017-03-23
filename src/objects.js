@@ -3,6 +3,7 @@
 const lodash = require('lodash');
 const {GanomedeError} = require('./errors');
 const resolveLocation = require('./resolve-location');
+const {hasOwnProperty} = require('./utils');
 
 class SubscriptionRequest {
   constructor ({userId, email, from, metadata}) {
@@ -25,7 +26,8 @@ class SubscriptionRequest {
       );
     }
 
-    const {userId, metadata} = event.data;
+    const {userId} = event.data;
+    const metadata = lodash.get(event, 'data.metadata', {});
     const email = lodash.get(event, 'data.aliases.email');
     const newsletter = lodash.get(event, 'data.metadata.newsletter', true);
 
@@ -62,16 +64,29 @@ class SubscriptionInfo {
   }
 }
 
+const safeAssign = (dst, dstProp, src, srcProp) => {
+  if (src && hasOwnProperty(src, srcProp))
+    dst[dstProp] = src[srcProp];
+};
+
 class MailchimpPayload {
   constructor (subscriptionRequest) {
     this.email_address = subscriptionRequest.email;
     this.status = 'subscribed';
     this.merge_fields = {
       G_USERID: subscriptionRequest.userId,
-      G_VIA: subscriptionRequest.from,
-      G_COUNTRY: subscriptionRequest.metadata.country,
-      G_YOB: subscriptionRequest.metadata.yearofbirth
+      G_VIA: subscriptionRequest.from
     };
+
+    safeAssign(
+      this.merge_fields, 'G_COUNTRY',
+      subscriptionRequest.metadata, 'country'
+    );
+
+    safeAssign(
+      this.merge_fields, 'G_YOB',
+      subscriptionRequest.metadata, 'yearofbirth'
+    );
 
     const location = resolveLocation(subscriptionRequest.metadata);
     if (location)

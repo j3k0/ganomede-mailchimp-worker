@@ -37,6 +37,12 @@ describe('objects', () => {
         });
       });
 
+      it('gracefuly works around missing metadata', () => {
+        const e = event();
+        delete e.data.metadata;
+        expect(SubscriptionRequest.fromEvent(e).metadata).to.eql({});
+      });
+
       describe('returns IgnoredEventError', () => {
         const mustBeError = (actual, re) => {
           expect(actual).to.be.instanceof(SubscriptionRequest.IgnoredEventError);
@@ -139,15 +145,26 @@ describe('objects', () => {
         });
       });
 
-      it('if no country or location is specified, `location` is not included', () => {
+      describe('empty metadata is okay', () => {
         const req = {
           userId: 'alice',
           email: 'alice@wonderland.com',
-          from: 'app',
-          metadata: {}
+          from: 'app'
         };
 
-        expect(new MailchimpPayload(req)).to.not.have.property('location');
+        const payload = new MailchimpPayload(req);
+
+        it('location is not set', () => {
+          expect(payload).to.not.have.property('location');
+        });
+
+        it('merge_fields.G_COUNTRY is not set', () => {
+          expect(payload.merge_fields).to.not.have.property('G_COUNTRY');
+        });
+
+        it('merge_fields.G_YOB is not set', () => {
+          expect(payload.merge_fields).to.not.have.property('G_YOB');
+        });
       });
     });
 

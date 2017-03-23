@@ -43,7 +43,7 @@ const getCountry = (code) => {
   return locations.get(String(code).toUpperCase());
 };
 
-const resolve = (metadata) => {
+const resolve = (metadata = {}) => {
   if (hasExplicitCoordinates(metadata))
     return lodash.pick(metadata, 'latitude', 'longitude');
 
