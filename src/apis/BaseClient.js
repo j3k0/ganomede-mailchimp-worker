@@ -45,7 +45,9 @@ class BaseClient {
 }
 
 BaseClient.defaultOptions = {
-  retry: false, // TODO consider removing in production or altogether
+  // Enable retries in establishing TCP connection
+  // (this will not retry on HTTP errors).
+  // retry: false,
   headers: {
     'accept': 'application/json',
     'accept-encoding': 'gzip,deflate'
