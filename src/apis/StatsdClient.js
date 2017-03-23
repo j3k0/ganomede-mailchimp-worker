@@ -15,7 +15,7 @@ class StatsdClient extends Statsd {
     };
 
     if (!hasVars)
-      logger.warn({hostname, port, prefix}, 'StatsdClient missing some config options');
+      logger.warn(config, 'StatsdClient missing some config options, stats will not be sent.');
 
     super(config);
     this.config = config;
