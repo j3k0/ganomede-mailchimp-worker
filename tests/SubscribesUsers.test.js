@@ -1,6 +1,7 @@
 'use strict';
 
-const {createAction, SubscribeAction} = require('../src/actions');
+const {SubscriptionInfo} = require('../src/objects');
+const {createAction, SubscribeAction, UpdateEmailAction} = require('../src/actions');
 
 describe('SubscribesUsers', () => {
   describe('#process()', () => {
@@ -13,8 +14,8 @@ describe('SubscribesUsers', () => {
     beforeEach(() => {
       logger = td.replace('../src/logger', td.object(['info']));
       SubscribesUsers = require('../src/SubscribesUsers');
-      usermetaClient = td.object(['write']);
-      mailchimpClient = td.object(['subscribe']);
+      usermetaClient = td.object(['read', 'write']);
+      mailchimpClient = td.object(['subscribe', 'updateSubscription']);
       subject = new SubscribesUsers({
         newsletterName: 'test',
         mailchimpListId: 'deadbeef',
@@ -49,6 +50,47 @@ describe('SubscribesUsers', () => {
         expect(nullIfEventWasIgnored).to.be.undefined;
         // Since <null> will fall through, check that everything was called.
         td.assert(mailchimpClient.subscribe).callCount(1);
+        td.assert(usermetaClient.write).callCount(1);
+        done();
+      });
+    });
+
+    it('processes CHANGE events by changing user\'s email', (done) => {
+      const event = {
+        type: 'CHANGE',
+        from: 'ganomede-users-service',
+        data: {
+          userId: 'bob',
+          aliases: {email: 'bob@new-hip-server.com'},
+          metadata: {}
+        }
+      };
+
+      const refMailchimpReply = {ref: 1};
+      const subscriptionData = JSON.stringify({
+        type: 'mailchimp',
+        listId: 'deadbeef',
+        subscriptionId: 'sub-id',
+        G_VIA: 'previous'
+      });
+
+      // ask usermeta for current subscription
+      td.when(usermetaClient.read('bob', 'newsletters$test', td.callback))
+        .thenCallback(null, {bob: {newsletters$test: subscriptionData}});
+
+      // change mailchimp address
+      td.when(mailchimpClient.updateSubscription(td.matchers.isA(SubscriptionInfo), td.matchers.isA(UpdateEmailAction), td.callback))
+        .thenCallback(null, refMailchimpReply);
+
+      // save results
+      td.when(usermetaClient.write('bob', 'newsletters$test', '{"ref":1}', td.callback))
+        .thenCallback(null, {});
+
+      subject.process(event, (err, nullIfEventWasIgnored) => {
+        expect(err).to.be.null;
+        expect(nullIfEventWasIgnored).to.be.undefined;
+        td.assert(usermetaClient.read).callCount(1);
+        td.assert(mailchimpClient.updateSubscription).callCount(1);
         td.assert(usermetaClient.write).callCount(1);
         done();
       });
