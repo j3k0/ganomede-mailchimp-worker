@@ -1,13 +1,19 @@
-# Derived from Node.js (https://github.com/nodejs/node/blob/master/.eslintrc)
+parserOptions:
+  ecmaVersion: 2017
+  sourceType: script
 
 env:
   node: true
   es6: true
 
 rules:
+  # My Rules
+  no-shadow: 'error'
+  comma-dangle: 2
+  no-global-assign: 2
+
   # Possible Errors
   # http://eslint.org/docs/rules/#possible-errors
-  comma-dangle: [2, "only-multiline"]
   no-control-regex: 2
   no-debugger: 2
   no-dupe-args: 2

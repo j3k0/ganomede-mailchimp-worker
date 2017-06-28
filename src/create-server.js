@@ -33,12 +33,12 @@ const shouldLogRequest = (req) =>
 const shouldLogResponse = (res) =>
   (res && res.statusCode >= 500);
 
-const filteredLogger = (errorsOnly, logger) => (req, res, next) => {
+const filteredLogger = (errorsOnly, customLogger) => (req, res, next) => {
   const logError = errorsOnly && shouldLogResponse(res);
   const logInfo = !errorsOnly && (
     shouldLogRequest(req) || shouldLogResponse(res));
   if (logError || logInfo)
-    logger(req, res);
+    customLogger(req, res);
   if (next && typeof next === 'function')
     next();
 };

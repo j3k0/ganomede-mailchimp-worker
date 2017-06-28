@@ -82,7 +82,7 @@ module.exports = {
     listId: nonempty('MAILCHIMP_LIST_ID'),
     clientId: nonempty('MAILCHIMP_CLIENT_ID', `${pkg.name}/${pkg.version}`),
     apiKey: nonempty('MAILCHIMP_API_KEY'),
-    dataCenter: nonempty('MAILCHIMP_DATA_CENTER'),
+    dataCenter: nonempty('MAILCHIMP_DATA_CENTER')
   },
 
   usermeta: Object.assign(

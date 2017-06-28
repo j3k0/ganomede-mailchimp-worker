@@ -4,7 +4,7 @@ const lodash = require('lodash');
 const capitals = require('./country-capitals.json');
 
 const locations = (() => {
-  const locations = new Map();
+  const result = new Map();
 
   capitals.forEach(entry => {
     const code = entry.CountryCode;
@@ -18,13 +18,13 @@ const locations = (() => {
     if (Number.isNaN(latitude) || Number.isNaN(longitude))
       throw new Error(`Wierd location data, got NaN values for code ${code}`);
 
-    if (locations.has(key))
+    if (result.has(key))
       throw new Error(`Wierd location data, code ${code} is included multiple times`);
 
-    locations.set(key, {latitude, longitude});
+    result.set(key, {latitude, longitude});
   });
 
-  return locations;
+  return result;
 })();
 
 const hasCoordinate = (metadata, key) => {
