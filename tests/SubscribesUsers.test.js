@@ -1,6 +1,6 @@
 'use strict';
 
-const {SubscriptionRequest} = require('../src/objects');
+const {createAction, SubscribeAction} = require('../src/actions');
 
 describe('SubscribesUsers', () => {
   describe('#process()', () => {
@@ -23,7 +23,7 @@ describe('SubscribesUsers', () => {
       });
     });
 
-    it('ties everything together', (done) => {
+    it('processes CREATE events by subscribing to mailchimp', (done) => {
       const event = {
         type: 'CREATE',
         from: 'some-app',
@@ -34,10 +34,14 @@ describe('SubscribesUsers', () => {
         }
       };
 
-      td.when(mailchimpClient.subscribe('deadbeef', td.matchers.isA(Object), td.callback))
-        .thenCallback(null, 'stuff');
+      const refMailchimpReply = {ref: true};
 
-      td.when(usermetaClient.write('bob', 'newsletters$test', td.matchers.isA(String), td.callback))
+      // first it will ask mailchimp to subscribe user
+      td.when(mailchimpClient.subscribe('deadbeef', td.matchers.isA(SubscribeAction), td.callback))
+        .thenCallback(null, refMailchimpReply);
+
+      // then it will save result into usermeta
+      td.when(usermetaClient.write('bob', 'newsletters$test', '{"ref":true}', td.callback))
         .thenCallback(null, {});
 
       subject.process(event, (err, nullIfEventWasIgnored) => {
@@ -51,12 +55,15 @@ describe('SubscribesUsers', () => {
     });
 
     it('null falls through and ignored event is logged', (done) => {
-      subject.process({id: 42, type: 'returns null'}, (err, nullIfEventWasIgnored) => {
+      const event = {id: 42, type: 'bad action returns null'};
+      const {reason: expectedReason} = createAction(event);
+
+      subject.process(event, (err, nullIfEventWasIgnored) => {
         expect(err).to.be.null;
         expect(nullIfEventWasIgnored).to.be.null;
         td.assert(mailchimpClient.subscribe).callCount(0);
         td.assert(usermetaClient.write).callCount(0);
-        td.verify(logger.info(td.matchers.isA(SubscriptionRequest.IgnoredEventError), 'Event(id=42) ignored'));
+        td.verify(logger.info(td.matchers.isA(Object), `Event(id=42) resulted in IgnoreAction: ${expectedReason}`));
         done();
       });
     });

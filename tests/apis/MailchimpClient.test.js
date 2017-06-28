@@ -1,7 +1,8 @@
 'use strict';
 
 const url = require('url');
-const {SubscriptionRequest, SubscriptionInfo} = require('../../src/objects');
+const {createAction} = require('../../src/actions');
+const {SubscriptionInfo} = require('../../src/objects');
 const MailchimpClient = require('../../src/apis/MailchimpClient');
 
 describe('MailchimpClient', () => {
@@ -24,8 +25,8 @@ describe('MailchimpClient', () => {
   });
 
   describe('#subscribe()', () => {
-    it('uses subscription request to subscribe user to listId', (done) => {
-      const req = new SubscriptionRequest({
+    it('uses SubscribeAction to subscribe user to listId', (done) => {
+      const req = createAction({
         userId: 'bob',
         email: 'bob@example.com',
         from: 'some-app',
