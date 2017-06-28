@@ -1,8 +1,10 @@
 'use strict';
 
+const assert = require('assert');
 const urlEscape = require('url-escape-tag');
 const BaseClient = require('./BaseClient');
 const {MailchimpPayload} = require('../objects');
+const {SubscribeAction} = require('../actions');
 const logger = require('../logger');
 
 const toBase64 = (str) => Buffer.from(str, 'utf8').toString('base64');
@@ -16,6 +18,7 @@ class MailchimpClient extends BaseClient {
   }
 
   subscribe (listId, request, callback) {
+    assert(request instanceof SubscribeAction);
     const payload = new MailchimpPayload(request);
 
     this.apiCall('post', urlEscape`/lists/${listId}/members`, payload, (err, reply) => {
