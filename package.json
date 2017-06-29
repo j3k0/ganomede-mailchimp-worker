@@ -11,7 +11,9 @@
     "test": "./run-tests",
     "testw": "nodemon --watch src/ --watch tests/ --watch config.js --exec 'npm test'",
     "coverage": "istanbul cover _mocha -- -b tests/ && istanbul report",
-    "lint": "eslint src/ tests/ index.js config.js"
+    "lint": "eslint src/ tests/ index.js config.js",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -42,6 +44,8 @@
     "newrelic": "^1.38.1",
     "node-statsd": "^0.1.1",
     "restify": "^4.1.1",
-    "url-escape-tag": "^1.0.0"
-  }
+    "url-escape-tag": "^1.0.0",
+    "snyk": "^1.30.1"
+  },
+  "snyk": true
 }
