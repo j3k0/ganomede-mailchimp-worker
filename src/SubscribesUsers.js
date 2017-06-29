@@ -61,7 +61,7 @@ class SubscribesUsers {
 
         cb(null, request);
       },
-      (request, cb) => this.mailchimp.subscribe(this.mailchimpListId, request, cb),
+      (req, cb) => this.mailchimp.subscribe(this.mailchimpListId, req, cb),
       (info, cb) => this.usermeta.write(
         request.userId,
         this.metaKey,

@@ -152,18 +152,18 @@ describe('objects', () => {
           from: 'app'
         };
 
-        const payload = new MailchimpPayload(req);
+        const payloadLocal = new MailchimpPayload(req);
 
         it('location is not set', () => {
-          expect(payload).to.not.have.property('location');
+          expect(payloadLocal).to.not.have.property('location');
         });
 
         it('merge_fields.G_COUNTRY is not set', () => {
-          expect(payload.merge_fields).to.not.have.property('G_COUNTRY');
+          expect(payloadLocal.merge_fields).to.not.have.property('G_COUNTRY');
         });
 
         it('merge_fields.G_YOB is not set', () => {
-          expect(payload.merge_fields).to.not.have.property('G_YOB');
+          expect(payloadLocal.merge_fields).to.not.have.property('G_YOB');
         });
       });
     });
