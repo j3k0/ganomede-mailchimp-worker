@@ -1,35 +1,15 @@
 'use strict';
 
 const async = require('async');
-const {SubscriptionRequest} = require('../src/objects');
+const lodash = require('lodash');
 const logger = require('./logger');
-
-// fn is a function with signature:
-//  - (callback)
-//  - (argument, callback)
-//
-// In first case, we just return fn.
-// In second case, we guard against <argument> being null by invoking
-//   callback(null, null)
-// in that case.
-//
-// Callback is expected to have signature (error, result).
-const guardVsNull = (fn) => {
-  switch (fn.length) {
-    case 1:
-      return fn;
-
-    case 2:
-      return (arg, cb) => {
-        return (arg === null)
-          ? process.nextTick(cb, null, null)
-          : fn(arg, cb);
-      };
-
-    default:
-      throw new Error(`fn() has unsupported number of arguments (${fn.length})`);
-  }
-};
+const {SubscriptionInfo} = require('./objects');
+const {
+  createAction,
+  IgnoreAction,
+  SubscribeAction,
+  UpdateEmailAction
+} = require('./actions');
 
 class SubscribesUsers {
   constructor ({
@@ -46,31 +26,52 @@ class SubscribesUsers {
     this.allowedFromValues = allowedFromValues;
   }
 
-  process (event, callback) {
-    const request = SubscriptionRequest.fromEvent(
-      event,
-      {allowedFromValues: this.allowedFromValues}
+  readSubscription (userId, cb) {
+    this.usermeta.read(userId, this.metaKey, (err, data) => {
+      if (err)
+        return cb(err);
+
+      const info = lodash.get(data, `${userId}.${this.metaKey}`, false);
+
+      return info
+        ? cb(null, new SubscriptionInfo(JSON.parse(info)))
+        : cb(new Error(`User \`${userId}\` has no subscription info saved`));
+    });
+  }
+
+  saveSubscription (userId, subscriptionInfo, cb) {
+    this.usermeta.write(
+      userId,
+      this.metaKey,
+      JSON.stringify(subscriptionInfo),
+      cb
     );
+  }
 
-    const steps = [
-      (cb) => { // We need `request` in scope for `write()`, so nullify it inside.
-        if (request instanceof SubscriptionRequest.IgnoredEventError) {
-          logger.info(request, `Event(id=${event.id}) ignored`);
-          return cb(null, null);
-        }
+  process (event, callback) {
+    const action = createAction(event);
 
-        cb(null, request);
-      },
-      (req, cb) => this.mailchimp.subscribe(this.mailchimpListId, req, cb),
-      (info, cb) => this.usermeta.write(
-        request.userId,
-        this.metaKey,
-        JSON.stringify(info),
-        (err, res) => cb(err)
-      )
-    ].map(guardVsNull);
+    switch (action.constructor) {
+      case SubscribeAction:
+        async.waterfall([
+          this.mailchimp.subscribe.bind(this.mailchimp, this.mailchimpListId, action),
+          this.saveSubscription.bind(this, action.userId)
+        ], (err, metaReply) => callback(err));
+        break;
 
-    async.waterfall(steps, callback);
+      case UpdateEmailAction:
+        async.waterfall([
+          this.readSubscription.bind(this, action.userId),
+          (subscription, cb) => this.mailchimp.updateSubscription(subscription, action, cb),
+          this.saveSubscription.bind(this, action.userId)
+        ], (err, metaReply) => callback(err));
+        break;
+
+      case IgnoreAction:
+        logger.info({event, action}, `Event(id=${event.id}) resulted in ${action.constructor.name}: ${action.reason}`);
+        setImmediate(callback, null, null);
+        break;
+    }
   }
 }
 

@@ -9,6 +9,14 @@ class UsermetaClient extends BaseClient {
     this.secret = secret;
   }
 
+  read (userId, metaNames, callback) {
+    const token = `${this.secret}.${userId}`;
+    const keys = Array.isArray(metaNames) ? metaNames : [metaNames];
+    const path = urlEscape`/auth/${token}/${keys.join(',')}`;
+
+    this.apiCall('get', path, callback);
+  }
+
   write (userId, metaName, value, callback) {
     const token = `${this.secret}.${userId}`;
     const path = urlEscape`/auth/${token}/${metaName}`;
