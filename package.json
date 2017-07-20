@@ -41,7 +41,7 @@
     "lodash": "^4.17.2",
     "newrelic": "^1.38.1",
     "node-statsd": "^0.1.1",
-    "restify": "^4.1.1",
+    "restify": "^5.0.1",
     "url-escape-tag": "^1.0.0"
   }
 }
